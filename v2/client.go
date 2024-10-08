@@ -2,9 +2,6 @@ package v2
 
 import (
 	"net/http"
-	"time"
-
-	"github.com/Predixxion/gosoap"
 )
 
 type RotorSoftClient struct {
