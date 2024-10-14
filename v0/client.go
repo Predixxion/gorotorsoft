@@ -15,6 +15,7 @@ type RotorSoftClient struct {
 	URL        string
 	Username   string
 	Password   string
+	Helper     *Helper
 }
 
 func (r *RotorSoftClient) GetAllEndPoints() (*GetAllEndPointsResponse, error) {

@@ -17,6 +17,15 @@ type Client struct {
 }
 
 func NewClient(httpClient *http.Client, url, username, password string) *Client {
+	rotorSoftClientV0 := &v0.RotorSoftClient{
+		HTTPClient: httpClient,
+		URL:        url,
+		Username:   username,
+		Password:   password,
+		Helper:     &v0.Helper{},
+	}
+	rotorSoftClientV0.Helper.Client = rotorSoftClientV0
+
 	rotorSoftClientV3 := &v3.RotorSoftClient{
 		HTTPClient: httpClient,
 		URL:        url,
@@ -27,7 +36,7 @@ func NewClient(httpClient *http.Client, url, username, password string) *Client 
 	rotorSoftClientV3.Helper.Client = rotorSoftClientV3
 
 	return &Client{
-		V0: &v0.RotorSoftClient{HTTPClient: httpClient, URL: url, Username: username, Password: password},
+		V0: rotorSoftClientV0,
 		V1: &v1.RotorSoftClient{HTTPClient: httpClient, URL: url, Username: username, Password: password},
 		V2: &v2.RotorSoftClient{HTTPClient: httpClient, URL: url, Username: username, Password: password},
 		V3: rotorSoftClientV3,
