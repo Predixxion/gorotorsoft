@@ -17,7 +17,7 @@ type RotorSoftClient struct {
 	Password   string
 }
 
-func (r *RotorSoftClient) GetAllEndPoints() GetAllEndPointsResponse {
+func (r *RotorSoftClient) GetAllEndPoints() (*GetAllEndPointsResponse, error) {
 	gosoap.SetCustomEnvelope("soap", map[string]string{
 		"xmlns:soap": "http://schemas.xmlsoap.org/soap/envelope/",
 		"xmlns:v0":   "urn:service:drehpunkt:rotorsoft:soap:v0",
@@ -32,8 +32,7 @@ func (r *RotorSoftClient) GetAllEndPoints() GetAllEndPointsResponse {
 	params := gosoap.ArrayParams{}
 	res, err := client.Call("v0:getAllEndPoints", params)
 	if err != nil {
-		log.Println(string(gosoap.GetPayloadFromError(err)))
-		log.Fatalf("Call error: %s", err)
+		return nil, err
 	}
 
 	var response GetAllEndPointsResponse
@@ -42,10 +41,10 @@ func (r *RotorSoftClient) GetAllEndPoints() GetAllEndPointsResponse {
 		log.Fatalf("xml.Unmarshal error: %s", err)
 	}
 
-	return response
+	return &response, nil
 }
 
-func (r *RotorSoftClient) GetAllPowerUnits() GetAllPowerUnitsResponse {
+func (r *RotorSoftClient) GetAllPowerUnits() (*GetAllPowerUnitsResponse, error) {
 	gosoap.SetCustomEnvelope("soap", map[string]string{
 		"xmlns:soap": "http://schemas.xmlsoap.org/soap/envelope/",
 		"xmlns:v0":   "urn:service:drehpunkt:rotorsoft:soap:v0",
@@ -60,8 +59,7 @@ func (r *RotorSoftClient) GetAllPowerUnits() GetAllPowerUnitsResponse {
 	params := gosoap.ArrayParams{{"userName", r.Username}, {"password", r.Password}}
 	res, err := client.Call("v0:getAllPowerUnits", params)
 	if err != nil {
-		log.Println(string(gosoap.GetPayloadFromError(err)))
-		log.Fatalf("Call error: %s", err)
+		return nil, err
 	}
 
 	var response GetAllPowerUnitsResponse
@@ -70,10 +68,10 @@ func (r *RotorSoftClient) GetAllPowerUnits() GetAllPowerUnitsResponse {
 		log.Fatalf("xml.Unmarshal error: %s", err)
 	}
 
-	return response
+	return &response, nil
 }
 
-func (r *RotorSoftClient) Ping() PingResponse {
+func (r *RotorSoftClient) Ping() (*PingResponse, error) {
 	gosoap.SetCustomEnvelope("soap", map[string]string{
 		"xmlns:soap": "http://schemas.xmlsoap.org/soap/envelope/",
 		"xmlns:v0":   "urn:service:drehpunkt:rotorsoft:soap:v0",
@@ -88,8 +86,7 @@ func (r *RotorSoftClient) Ping() PingResponse {
 	params := gosoap.ArrayParams{}
 	res, err := client.Call("v0:ping", params)
 	if err != nil {
-		log.Println(string(gosoap.GetPayloadFromError(err)))
-		log.Fatalf("Call error: %s", err)
+		return nil, err
 	}
 
 	var response PingResponse
@@ -98,10 +95,10 @@ func (r *RotorSoftClient) Ping() PingResponse {
 		log.Fatalf("xml.Unmarshal error: %s", err)
 	}
 
-	return response
+	return &response, nil
 }
 
-func (r *RotorSoftClient) GetDataClassesForPowerUnits(powerUnitIdentifier []string) GetDataClassesForPowerUnitsResponse {
+func (r *RotorSoftClient) GetDataClassesForPowerUnits(powerUnitIdentifier []string) (*GetDataClassesForPowerUnitsResponse, error) {
 	gosoap.SetCustomEnvelope("soap", map[string]string{
 		"xmlns:soap": "http://schemas.xmlsoap.org/soap/envelope/",
 		"xmlns:v0":   "urn:service:drehpunkt:rotorsoft:soap:v0:rawdata",
@@ -120,8 +117,7 @@ func (r *RotorSoftClient) GetDataClassesForPowerUnits(powerUnitIdentifier []stri
 
 	res, err := client.Call("v0:getDataClassesForPowerUnits", params)
 	if err != nil {
-		log.Println(string(gosoap.GetPayloadFromError(err)))
-		log.Fatalf("Call error: %s", err)
+		return nil, err
 	}
 
 	var response GetDataClassesForPowerUnitsResponse
@@ -130,10 +126,10 @@ func (r *RotorSoftClient) GetDataClassesForPowerUnits(powerUnitIdentifier []stri
 		log.Fatalf("xml.Unmarshal error: %s", err)
 	}
 
-	return response
+	return &response, nil
 }
 
-func (r *RotorSoftClient) GetDataFieldsForPowerUnits(powerUnitIdentifier []string, dataClassIdentifier []string) GetDataFieldsForPowerUnitsResponse {
+func (r *RotorSoftClient) GetDataFieldsForPowerUnits(powerUnitIdentifier []string, dataClassIdentifier []string) (*GetDataFieldsForPowerUnitsResponse, error) {
 	gosoap.SetCustomEnvelope("soap", map[string]string{
 		"xmlns:soap": "http://schemas.xmlsoap.org/soap/envelope/",
 		"xmlns:v0":   "urn:service:drehpunkt:rotorsoft:soap:v0:rawdata",
@@ -156,8 +152,7 @@ func (r *RotorSoftClient) GetDataFieldsForPowerUnits(powerUnitIdentifier []strin
 
 	res, err := client.Call("v0:getDataFieldsForPowerUnits", params)
 	if err != nil {
-		log.Println(string(gosoap.GetPayloadFromError(err)))
-		log.Fatalf("Call error: %s", err)
+		return nil, err
 	}
 
 	var response GetDataFieldsForPowerUnitsResponse
@@ -166,34 +161,70 @@ func (r *RotorSoftClient) GetDataFieldsForPowerUnits(powerUnitIdentifier []strin
 		log.Fatalf("xml.Unmarshal error: %s", err)
 	}
 
-	return response
+	return &response, nil
 }
-
-func (r *RotorSoftClient) GetRawDataForPowerUnits(powerUnitIdentifier []string, from time.Time, to time.Time, dataClassIdent string, dataFieldIdents []string) (GetRawDataForPowerUnitsResponse, error) {
+func (r *RotorSoftClient) GetRawDataForPowerUnitsExtended(powerUnitIdentifier []string, from time.Time, to time.Time, dataClassIdent string, dataFieldIdents []string) (GetRawDataForPowerUnitsResponse, error) {
 	const maxBatchSize = 10
+	const maxDaysPerRequest = 7
 
 	var combinedResponse GetRawDataForPowerUnitsResponse
+	var allErrors []error
+	successfulRequest := false
 
-	for i := 0; i < len(powerUnitIdentifier); i += maxBatchSize {
-		end := i + maxBatchSize
-		if end > len(powerUnitIdentifier) {
-			end = len(powerUnitIdentifier)
+	if dataClassIdent == "10m" {
+		for start := from; start.Before(to); {
+			end := start.AddDate(0, 0, maxDaysPerRequest)
+			if end.After(to) {
+				end = to
+			}
+			for i := 0; i < len(powerUnitIdentifier); i += maxBatchSize {
+				endBatch := i + maxBatchSize
+				if endBatch > len(powerUnitIdentifier) {
+					endBatch = len(powerUnitIdentifier)
+				}
+
+				batch := powerUnitIdentifier[i:endBatch]
+
+				response, err := r.GetRawDataForPowerUnits(batch, start, end, dataClassIdent, dataFieldIdents)
+				if err != nil {
+					allErrors = append(allErrors, err)
+					continue
+				}
+
+				successfulRequest = true
+				combinedResponse = mergeResponses(combinedResponse, response)
+			}
+
+			start = end
 		}
+	} else {
+		for i := 0; i < len(powerUnitIdentifier); i += maxBatchSize {
+			endBatch := i + maxBatchSize
+			if endBatch > len(powerUnitIdentifier) {
+				endBatch = len(powerUnitIdentifier)
+			}
 
-		batch := powerUnitIdentifier[i:end]
+			batch := powerUnitIdentifier[i:endBatch]
 
-		response, err := r.getRawDataForPowerUnitBatch(batch, from, to, dataClassIdent, dataFieldIdents)
-		if err != nil {
-			return GetRawDataForPowerUnitsResponse{}, err
+			response, err := r.GetRawDataForPowerUnits(batch, from, to, dataClassIdent, dataFieldIdents)
+			if err != nil {
+				allErrors = append(allErrors, err)
+				continue
+			}
+
+			successfulRequest = true
+			combinedResponse = mergeResponses(combinedResponse, response)
 		}
+	}
 
-		combinedResponse = mergeResponses(combinedResponse, response)
+	if !successfulRequest {
+		return GetRawDataForPowerUnitsResponse{}, fmt.Errorf("all requests failed: %v", allErrors)
 	}
 
 	return combinedResponse, nil
 }
 
-func (r *RotorSoftClient) getRawDataForPowerUnitBatch(batch []string, from time.Time, to time.Time, dataClassIdent string, dataFieldIdents []string) (GetRawDataForPowerUnitsResponse, error) {
+func (r *RotorSoftClient) GetRawDataForPowerUnits(powerUnitIdentifier []string, from time.Time, to time.Time, dataClassIdent string, dataFieldIdents []string) (GetRawDataForPowerUnitsResponse, error) {
 	gosoap.SetCustomEnvelope("soap", map[string]string{
 		"xmlns:soap": "http://schemas.xmlsoap.org/soap/envelope/",
 		"xmlns:v0":   "urn:service:drehpunkt:rotorsoft:soap:v0:rawdata",
@@ -201,13 +232,17 @@ func (r *RotorSoftClient) getRawDataForPowerUnitBatch(batch []string, from time.
 	url := fmt.Sprintf("%s/soap/v0/rawdata/?WSDL", r.URL)
 	client, err := gosoap.SoapClient(url, r.HTTPClient)
 
+	if len(powerUnitIdentifier) > 10 {
+		log.Fatalf("More than 10 powerUnitIdentifier provided!")
+	}
+
 	if err != nil {
 		return GetRawDataForPowerUnitsResponse{}, fmt.Errorf("SoapClient error: %w", err)
 	}
 
 	params := gosoap.ArrayParams{{"userName", r.Username}, {"password", r.Password}}
 
-	for _, id := range batch {
+	for _, id := range powerUnitIdentifier {
 		params = append(params, [2]interface{}{"powerUnitIdentifier", id})
 	}
 
@@ -221,15 +256,15 @@ func (r *RotorSoftClient) getRawDataForPowerUnitBatch(batch []string, from time.
 
 	res, err := client.Call("v0:getRawDataForPowerUnits", params)
 	if err != nil {
-		log.Println(string(gosoap.GetPayloadFromError(err)))
-		return GetRawDataForPowerUnitsResponse{}, fmt.Errorf("Call error: %w", err)
+		return GetRawDataForPowerUnitsResponse{}, err
 	}
 
 	var response GetRawDataForPowerUnitsResponse
 	err = xml.Unmarshal([]byte(res.Body), &response)
 	if err != nil {
-		return GetRawDataForPowerUnitsResponse{}, fmt.Errorf("xml.Unmarshal error: %w", err)
+		return GetRawDataForPowerUnitsResponse{}, err
 	}
+	log.Println(response.RawData)
 
 	return response, nil
 }
