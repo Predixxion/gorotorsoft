@@ -8,6 +8,11 @@ import (
 func ConvertRotorSoftRawDataToTable(rawData v0.GetRawDataForPowerUnitsResponse, powerUnitMap map[string]string, dataFieldMap map[string]string) []v0.SensorValueTable {
 	sensorValueTables := make(map[string]*v0.SensorValueTable)
 
+	allTimestamps := make(map[time.Time]struct{})
+	for _, dataRecord := range rawData.RawData.DataRecords {
+		allTimestamps[dataRecord.RecordTime] = struct{}{}
+	}
+
 	for _, dataRecord := range rawData.RawData.DataRecords {
 		for _, recordField := range dataRecord.RecordFields {
 			if _, ok := sensorValueTables[dataFieldMap[recordField.DataFieldIdentifier]]; !ok {
@@ -24,6 +29,19 @@ func ConvertRotorSoftRawDataToTable(rawData v0.GetRawDataForPowerUnitsResponse, 
 			}
 
 			table.Records[dataRecord.RecordTime][powerUnitMap[dataRecord.RecordPowerUnitIdentifier]] = recordField.DataFieldValue
+		}
+	}
+
+	for _, table := range sensorValueTables {
+		for timestamp := range allTimestamps {
+			if _, ok := table.Records[timestamp]; !ok {
+				table.Records[timestamp] = make(map[string]string)
+			}
+			for _, turbineID := range powerUnitMap {
+				if _, exists := table.Records[timestamp][turbineID]; !exists {
+					table.Records[timestamp][turbineID] = ""
+				}
+			}
 		}
 	}
 
