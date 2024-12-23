@@ -93,8 +93,11 @@ func (r *Helper) GetLogbookEntriesByDateRangeForPowerUnit(powerUnitIdentifier st
 		if fromDateIndex == -1 {
 			for i, entry := range logbookEntries {
 				if entry.StartDate.Before(from) {
-					log.Println(logbookEntries[i-1])
-					fromDateIndex = i - 1
+					if i == 0 {
+						fromDateIndex = 0
+					} else {
+						fromDateIndex = i - 1
+					}
 					break
 				}
 
